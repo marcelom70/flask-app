@@ -1,15 +1,23 @@
-name: Flask CI
+name: Flask CI/CD
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Build Docker image
-        run: docker build -t flask-app .
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd your-repo || git clone https://github.com/marcelom70/flask-app.git
+            cd your-repo
+            git pull origin main
+            docker compose down
+            docker compose up -d --build
